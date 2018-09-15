@@ -21,8 +21,9 @@
 				  <div class="panel-body" id="items">
 				   <ul class="list-group">
 				   	@foreach ($items as $item)
-				     <li class="list-group-item ourItem" data-toggle="modal" data-target="#myModal">{{ $item->item }}</li>
-				     <input type="hidden" id="itemId" value="{{ $items->id }}">
+				     <li class="list-group-item ourItem" data-toggle="modal" data-target="#myModal">{{ $item->item }}
+				     <input type="hidden" id="itemId" value="{{ $item->id }}">
+				     </li>
 				   	@endforeach
 				   </ul>
 				  </div>
@@ -42,12 +43,13 @@
 			      </div>
 			      <div class="modal-footer">
 			        <button type="button" class="btn btn-default btn-warning" id="delete" data-dismiss="modal" style="display: none;">Delete</button>
-			        <button type="button" class="btn btn-primary" id="SaveChanges" style="display: none;" >Save changes</button>
+			        <button type="button" class="btn btn-primary" id="SaveChanges" style="display: none;" data-dismiss="modal">Save changes</button>
 			        <button type="butt  on" class="btn btn-primary" id="AddButton" data-dismiss="modal">Add Item</button>
 			      </div>
 			    </div><!-- /.modal-content -->
 			  </div><!-- /.modal-dialog -->
 			</div><!-- /.modal -->
+
 		</div>
 	</div>
 	{{ csrf_field() }}
@@ -60,7 +62,7 @@
 	<script>
 		$(document).ready(function() {
 			$(document).on('click', '.ourItem', function(event) {
-					var text = $(this).text();
+					var text = $.trim($(this).text());
 					var id = $(this).find('#itemId').val();
 					$('#title').text('Edit Item');
 					$('#addItem').val(text);
@@ -68,7 +70,7 @@
 					$('#SaveChanges').show('400');
 					$('#AddButton').hide('400');
 					$('#id').val(id);
-					console.log(text);
+					console.log(id);
 			});
 
 			$(document).on('click', '#addNew', function(event) {
@@ -77,7 +79,7 @@
 					$('#delete').hide('400');
 					$('#SaveChanges').hide('400');
 					$('#AddButton').show('400');
-			});
+			}); 
 			
 			// $.ajaxSetup({
 			//   headers: {
@@ -87,7 +89,6 @@
 			
 			$('#AddButton').click(function(event) {
 				var text = $('#addItem').val(); 
-
 				$.post('list', {'text': text,'_token':$('input[name=_token]').val()}, function(data) {
 					console.log(data);
 					$('#items').load(location.href + ' #items');
@@ -99,18 +100,31 @@
 				// 		   dataType: 'json',
 				//         data: { text : text },
 				//         success:function(data){
-				//             alert(data);
+				//             alert(data); 
 				//         },error:function(){ 
 				//             alert("error!!!!");
 				//         }
 				//     }); //end of ajax
 			});
 
-			$('#delete').click(function(event) {
+			$('#delete').click(function(event) { 
 				var id = $("#id").val();
+				$.post('delete', {'id': id,'_token':$('input[name=_token]').val()}, function(data) {
+					console.log(data);
+					$('#items').load(location.href + ' #items');
+				});
 			});
 
+			$('#SaveChanges').click(function(event) { 
+				var id = $("#id").val();
+				var value = $.trim($("#addItem").val());
+				$.post('update', {'id': id,'value': value, '_token':$('input[name=_token]').val()}, function(data) {
+					$('#items').load(location.href + ' #items');
+					console.log(data);
+				});
+			});
 		});
+
 	</script>
 </body>
 </html>
